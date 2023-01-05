@@ -33,3 +33,13 @@ class TeacherSignUpForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+class StudentInterestsForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields = ('interests', )
+        widgets = {
+            'interests': forms.CheckboxSelectMultiple
+        }
+
+
