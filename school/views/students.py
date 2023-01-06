@@ -1,13 +1,13 @@
 from django.views.generic import CreateView, ListView, UpdateView
-from django.contrib.auth import login
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
 from ..decorators import student_required
 from ..models import User, Student, Quiz, TakenQuiz
-from ..forms import StudentSignUpForm, StudentInterestsForm, T
+from ..forms import StudentSignUpForm, StudentInterestsForm
 
 
 
