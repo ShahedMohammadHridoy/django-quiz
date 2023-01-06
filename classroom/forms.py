@@ -1,7 +1,22 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import (Subject, User, Student, Question)
+from django.forms.utils import ValidationError
+
+from classroom.models import (Answer, Question, Student, StudentAnswer,
+                              Subject, User)
+
+
+class TeacherSignUpForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = User
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_teacher = True
+        if commit:
+            user.save()
+        return user
 
 
 class StudentSignUpForm(UserCreationForm):
@@ -23,16 +38,6 @@ class StudentSignUpForm(UserCreationForm):
         student.interests.add(*self.cleaned_data.get('interests'))
         return user
 
-class TeacherSignUpForm(UserCreationForm):
-    class Meta(UserCreationForm.Meta):
-        model = User
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.is_teacher = True
-        if commit:
-            user.save()
-        return user
 
 class StudentInterestsForm(forms.ModelForm):
     class Meta:
@@ -48,6 +53,7 @@ class QuestionForm(forms.ModelForm):
         model = Question
         fields = ('text', )
 
+
 class BaseAnswerInlineFormSet(forms.BaseInlineFormSet):
     def clean(self):
         super().clean()
@@ -60,3 +66,20 @@ class BaseAnswerInlineFormSet(forms.BaseInlineFormSet):
                     break
         if not has_one_correct_answer:
             raise ValidationError('Mark at least one answer as correct.', code='no_correct_answer')
+
+
+class TakeQuizForm(forms.ModelForm):
+    answer = forms.ModelChoiceField(
+        queryset=Answer.objects.none(),
+        widget=forms.RadioSelect(),
+        required=True,
+        empty_label=None)
+
+    class Meta:
+        model = StudentAnswer
+        fields = ('answer', )
+
+    def __init__(self, *args, **kwargs):
+        question = kwargs.pop('question')
+        super().__init__(*args, **kwargs)
+        self.fields['answer'].queryset = question.answers.order_by('text')

@@ -1,16 +1,18 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.decorators import method_decorator
-from django.urls import reverse_lazy, reverse
 from django.db import transaction
 from django.db.models import Avg, Count
 from django.forms import inlineformset_factory
-from ..models import User, Quiz, Question, Answer
-from ..forms import TeacherSignUpForm, QuestionForm, BaseAnswerInlineFormSet
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView)
+
 from ..decorators import teacher_required
+from ..forms import BaseAnswerInlineFormSet, QuestionForm, TeacherSignUpForm
+from ..models import Answer, Question, Quiz, User
 
 
 class TeacherSignUpView(CreateView):
@@ -42,6 +44,7 @@ class QuizListView(ListView):
             .annotate(taken_count=Count('taken_quizzes', distinct=True))
         return queryset
 
+
 @method_decorator([login_required, teacher_required], name='dispatch')
 class QuizCreateView(CreateView):
     model = Quiz
@@ -54,6 +57,7 @@ class QuizCreateView(CreateView):
         quiz.save()
         messages.success(self.request, 'The quiz was created with success! Go ahead and add some questions now.')
         return redirect('teachers:quiz_change', quiz.pk)
+
 
 @method_decorator([login_required, teacher_required], name='dispatch')
 class QuizUpdateView(UpdateView):
@@ -77,6 +81,7 @@ class QuizUpdateView(UpdateView):
     def get_success_url(self):
         return reverse('teachers:quiz_change', kwargs={'pk': self.object.pk})
 
+
 @method_decorator([login_required, teacher_required], name='dispatch')
 class QuizDeleteView(DeleteView):
     model = Quiz
@@ -91,7 +96,7 @@ class QuizDeleteView(DeleteView):
 
     def get_queryset(self):
         return self.request.user.quizzes.all()
-    
+
 
 @method_decorator([login_required, teacher_required], name='dispatch')
 class QuizResultsView(DetailView):
