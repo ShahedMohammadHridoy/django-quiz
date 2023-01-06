@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
 from ..decorators import student_required
 from ..models import User, Student, Quiz, TakenQuiz
-from ..forms import StudentSignUpForm, StudentInterestsForm
+from ..forms import StudentSignUpForm, StudentInterestsForm, T
 
 
 
